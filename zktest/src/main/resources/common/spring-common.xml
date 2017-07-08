@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		"
+		>
+	<!-- 配置扫描包排除controller -->
+	<context:component-scan base-package="com.zki">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+
+	<!-- 引入配置文件 -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath*:jdbc/jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+
+
+    <bean id="writeDataSource"  class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${write.jdbc.url}" />
+        <property name="username" value="${write.jdbc.username}" />
+        <property name="password" value="${write.jdbc.password}" />
+        <property name="initialSize" value="5"/>
+        <property name="maxTotal" value="50" />
+        <property name="maxIdle" value="8" />
+        <property name="minIdle" value="5" />
+        <property name="maxWaitMillis" value="250000"/>
+        <property name="testWhileIdle" value="true" />
+        <property name="validationQuery" value="SELECT 1 FROM DUAL" />
+    </bean>
+
+    <!-- 读写分离配置-->
+    <bean id="readSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="writeDataSource" />
+        <property name="configLocation" value="classpath:context/mybatis-config.xml" />
+        <property name="mapperLocations">
+            <list>
+                <value>classpath:sqlMapper/*/read/*-sqlMapper.xml</value>
+            </list>
+        </property>
+        <!--分页插件配置，待定 2017-07-09 -->
+        <!--<property name="plugins">
+            <list>
+                <value>classpath:common/mybatis-plugins</value>
+            </list>
+        </property>-->
+    </bean>
+
+    <bean id="writeSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="writeDataSource" />
+        <property name="configLocation" value="classpath:context/mybatis-config.xml" />
+        <property name="mapperLocations">
+            <list>
+                <value>classpath:sqlMapper/*/write/*-sqlMapper.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="ReadMapper" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.zki.website.*.mapper.read" />
+        <property name="sqlSessionFactoryBeanName" value="readSqlSessionFactory" />
+    </bean>
+
+    <bean id="WriteMapper" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.zki.website.*.mapper.write" />
+        <property name="sqlSessionFactoryBeanName" value="writeSqlSessionFactory" />
+    </bean>
+
+	<aop:aspectj-autoproxy proxy-target-class="true"/> 
+	<tx:annotation-driven transaction-manager="transactionManager"	proxy-target-class="true" />
+
+    <bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.zki.website.*.mapper.*"/>
+        <property name="properties">
+            <value>
+                mappers=com.zki.website.common.mapper.ReadMapper,com.zki.website.common.mapper.WriteMapper
+            </value>
+        </property>
+    </bean>
+
+
+    <!-- 配置事务 -->
+    <bean id="tx_manager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="writeDataSource" />
+    </bean>
+    <tx:annotation-driven transaction-manager="tx_manager"
+                          proxy-target-class="true" />
+    <!-- 应用事务 -->
+    <tx:advice id="tx_advice" transaction-manager="tx_manager">
+        <tx:attributes>
+            <tx:method name="*" propagation="REQUIRED" rollback-for="ApplicationException" />
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 通知器(把事务通知绑定到切入点) -->
+    <aop:config proxy-target-class="true">
+        <aop:advisor advice-ref="tx_advice"
+                     pointcut="execution(* com.zki.website.*.service.*.*(..) throws com.zki.website.common.exception.ApplicationException )" />
+    </aop:config>
+
+    <aop:aspectj-autoproxy />
+
+
+ </beans>

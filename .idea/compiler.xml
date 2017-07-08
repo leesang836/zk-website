@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="zk-common" />
+        <module name="zk-user" />
+        <module name="zk-userweb" />
+        <module name="zktest" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel target="1.8">
+      <module name="common" target="1.8" />
+      <module name="zk-common" target="1.5" />
+      <module name="zk-user" target="1.5" />
+      <module name="zk-userweb" target="1.5" />
+      <module name="zk-website" target="1.5" />
+      <module name="zktest" target="1.5" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/zk-common/zk-common.iml" filepath="$PROJECT_DIR$/zk-common/zk-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/zk-user/zk-user.iml" filepath="$PROJECT_DIR$/zk-user/zk-user.iml" />
+      <module fileurl="file://$PROJECT_DIR$/zk-userweb/zk-userweb.iml" filepath="$PROJECT_DIR$/zk-userweb/zk-userweb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/zk-website.iml" filepath="$PROJECT_DIR$/zk-website.iml" />
+      <module fileurl="file://$PROJECT_DIR$/zktest/zktest.iml" filepath="$PROJECT_DIR$/zktest/zktest.iml" />
+    </modules>
+  </component>
+</project>
